@@ -13,6 +13,7 @@ define(function (require, exports, module) {
         JSUtils                 = brackets.getModule("language/JSUtils"),
         FileViewController      = brackets.getModule("project/FileViewController"),
         ProjectManager          = brackets.getModule("project/ProjectManager"),
+        AppInit                 = brackets.getModule("utils/AppInit"),
         storageStack            = [],
         FUNCTION_NAME_INVALID   = "Invalid Function Name",
         NO_DEFINITION_MATCH     = "No Definition match";
@@ -41,8 +42,8 @@ define(function (require, exports, module) {
             findFunctionFile(selectedText.functionName).done(function () {
 //                editor.document.replaceRange("Hello, world!", insertionPos);    
                 console.debug(arguments);
-            }).fail(function () {
-                console.debug(arguments);
+            }).fail(function (err) {
+                _handleInvalid(err.reason);
             });
         }else{
             _handleInvalid(selectedText.reason);
@@ -52,7 +53,7 @@ define(function (require, exports, module) {
     function handleGoToBack() {
         if(storageStack.length > 0){
             var memory = storageStack.pop();
-            var filePath = memory.file._path;
+            var filePath = memory.file.fullPath;
             var ch = memory.pos.end.ch;
             var line = memory.pos.end.line;
             FileViewController.openFileAndAddToWorkingSet(filePath).done(function () {
@@ -122,7 +123,7 @@ define(function (require, exports, module) {
                                 result.resolve(functions);
                             } else {
                                 // No matching functions were found
-                                result.reject();
+                                result.reject({reason: NO_DEFINITION_MATCH});
                             }
                         })
                         .fail(function () {
@@ -139,10 +140,10 @@ define(function (require, exports, module) {
                             result.resolve(functions);
                         } else {
                             // No matching functions were found
-                            result.reject();
+                            result.reject({reason: NO_DEFINITION_MATCH});
                         }
-                    }).fail(function () {
-                        result.reject();
+                    }).fail(function (reason) {
+                        result.reject(reason);
                     });
                 }
 
@@ -175,17 +176,17 @@ define(function (require, exports, module) {
                             result.reject({reason: NO_DEFINITION_MATCH});
                             return;
                         }
-                        var filePath = functions[0].document.file._path
+                        var filePath = functions[0].document.file.fullPath;
                         FileViewController.openFileAndAddToWorkingSet(filePath).done(function () {
                             result.resolve(functions);
                         });
                     })
-                    .fail(function () {
-                        result.reject();
+                    .fail(function (reason) {
+                        result.reject(reason);
                     });
             })
-            .fail(function () {
-                result.reject();
+            .fail(function (reason) {
+                result.reject(reason);
             });
 
         return result.promise();
@@ -206,19 +207,69 @@ define(function (require, exports, module) {
      * @param cursorPos {!{line:number, ch:number}}
      */
     function _handleInvalid (reason) {
-        console.debug('Failed to load the definitions : /n',reason);
+        console.debug('Failed to load the definitions : \n',reason);
     }
 
+    
+    function handleAltClick () {
+        console.debug('Alt is held down');
+    }
+    
 
     // First, register a command - a UI-less object associating an id to a handler
-    var MY_COMMAND_ID = "sachin.clicktogotodefinition.forward";
-    CommandManager.register("Navigate To Definition", MY_COMMAND_ID, handleGoToForward);
+    var MY_COMMAND_ID_FORWARD = "sachin.clicktogotodefinition.forward";
+    CommandManager.register("Navigate To Definition", MY_COMMAND_ID_FORWARD, handleGoToForward);
     var MY_COMMAND_ID_BACK = "sachin.clicktogotodefinition.backward";
     CommandManager.register("Go Back", MY_COMMAND_ID_BACK, handleGoToBack);
+    var MY_COMMAND_ID_CLICK = "sachin.clicktogotodefinition.click";
+    CommandManager.register("clickEvent", MY_COMMAND_ID_CLICK, handleAltClick);
 
     // addign to context menu for now since ctrl+click is used for multiple cursor
     var contextMenu = Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU);
-    contextMenu.addMenuItem(MY_COMMAND_ID, "Ctrl-Alt-E");
-    contextMenu.addMenuItem(MY_COMMAND_ID_BACK, "Ctrl-Alt-W");
+    contextMenu.addMenuItem(MY_COMMAND_ID_FORWARD);
+    contextMenu.addMenuItem(MY_COMMAND_ID_BACK);
+    
+    AppInit.appReady(function () {
+        console.debug('htmlReady');
+        // click listeners
+        $("#editor-holder").on('click', function (e) {
+            if(e.altKey){
+                console.info(e);
+            }
+        });
+        
+        // highlighters
+        $("#editor-holder").on('mousemove',function(e) {
+            if(e.altKey){
+                console.info(e.target, e.currentTarget);
+            }
+        });
+        
+    });
+    
+        //    $("#editor-holder").on('keydown keyup', function (e) {
+//        
+//            console.info(e);
+//            
+//                console.debug(this, overEvt);
+//              }).mouseout(function(outEvt) {
+//                console.debug(this, outEvt);
+//              });
+//        }
+//    });
+    
+    
+    
+    
+    
+    $(document).on('htmlContentLoadComplete', function (e) {
+        console.debug(e);
+    });
+
+    
+    
+    KeyBindingManager.addBinding(MY_COMMAND_ID_FORWARD, "Ctrl-Alt-E");
+    KeyBindingManager.addBinding(MY_COMMAND_ID_BACK, "Ctrl-Alt-W");
+//    KeyBindingManager.addBinding(MY_COMMAND_ID_CLICK, "Alt");
 
 });
