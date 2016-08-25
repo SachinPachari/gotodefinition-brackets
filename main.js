@@ -20,27 +20,43 @@ define(function (require, exports, module) {
 
 
     // Function to run when the menu item is clicked
-    function handleGoToForward() {
+    function handleGoToForward(functionObj, cmPos) {
         
-        var editor = EditorManager.getFocusedEditor();
+        var editor = EditorManager.getFocusedEditor(),
+            selectedText,
+            storage;
+        
         // Only provide a JavaScript editor when cursor is in JavaScript content
         if (editor.getModeForSelection() !== "javascript") {
             return null;
         }
         
-        // Only provide JavaScript editor if the selection is within a single line
-        var sel = editor.getSelection();
-        if (sel.start.line !== sel.end.line) {
-            return null;
+        if(functionObj === undefined){
+            // Only provide JavaScript editor if the selection is within a single line
+            var sel = editor.getSelection();
+            if (sel.start.line !== sel.end.line) {
+                return null;
+            }
+            selectedText = _getFunctionName(editor, sel.start);
+            storage = {
+                file: editor.getFile(), 
+                pos: sel.end
+            };
+            
+        }else{
+            selectedText = _getFunctionName(editor, cmPos);
+            storage = {
+                file: editor.getFile(), 
+                pos: {
+                    line: cmPos.line, 
+                    ch: functionObj.end // it is a ch value 
+                }
+            };
         }
         
-        var selectedText = _getFunctionName(editor, sel.start);
         if (selectedText.functionName !== null) {
-            storageStack.push({file: editor.getFile(), pos: sel});
-//            var selectedText = editor.getSelectedText();
-            
+            storageStack.push(storage);
             findFunctionFile(selectedText.functionName).done(function () {
-//                editor.document.replaceRange("Hello, world!", insertionPos);    
                 console.debug(arguments);
             }).fail(function (err) {
                 _handleInvalid(err.reason);
@@ -54,8 +70,8 @@ define(function (require, exports, module) {
         if(storageStack.length > 0){
             var memory = storageStack.pop();
             var filePath = memory.file.fullPath;
-            var ch = memory.pos.end.ch;
-            var line = memory.pos.end.line;
+            var ch = memory.pos.ch;
+            var line = memory.pos.line;
             FileViewController.openFileAndAddToWorkingSet(filePath).done(function () {
                 EditorManager.getCurrentFullEditor().setCursorPos(line, ch, true);
             });
@@ -211,65 +227,38 @@ define(function (require, exports, module) {
     }
 
     
-    function handleAltClick () {
-        console.debug('Alt is held down');
-    }
-    
-
     // First, register a command - a UI-less object associating an id to a handler
     var MY_COMMAND_ID_FORWARD = "sachin.clicktogotodefinition.forward";
     CommandManager.register("Navigate To Definition", MY_COMMAND_ID_FORWARD, handleGoToForward);
     var MY_COMMAND_ID_BACK = "sachin.clicktogotodefinition.backward";
     CommandManager.register("Go Back", MY_COMMAND_ID_BACK, handleGoToBack);
-    var MY_COMMAND_ID_CLICK = "sachin.clicktogotodefinition.click";
-    CommandManager.register("clickEvent", MY_COMMAND_ID_CLICK, handleAltClick);
 
-    // addign to context menu for now since ctrl+click is used for multiple cursor
+    // adding to context menu since it can help user to go back also.
     var contextMenu = Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU);
     contextMenu.addMenuItem(MY_COMMAND_ID_FORWARD);
     contextMenu.addMenuItem(MY_COMMAND_ID_BACK);
     
+    // adding the 
     AppInit.appReady(function () {
-        console.debug('htmlReady');
         // click listeners
         $("#editor-holder").on('click', function (e) {
+            // verifying if the 'Alt' key is pressed and held.
             if(e.altKey){
-                console.info(e);
+                
+                var editor = EditorManager.getFocusedEditor();
+                var cm = editor._codeMirror;
+                var cmPos = cm.coordsChar({
+                    left:e.pageX, 
+                    top:e.pageY
+                });
+                
+                var functionObj = cm.getTokenAt(cmPos);
+                
+                handleGoToForward(functionObj, cmPos);
             }
         });
-        
-        // highlighters
-        $("#editor-holder").on('mousemove',function(e) {
-            if(e.altKey){
-                console.info(e.target, e.currentTarget);
-            }
-        });
-        
     });
-    
-        //    $("#editor-holder").on('keydown keyup', function (e) {
-//        
-//            console.info(e);
-//            
-//                console.debug(this, overEvt);
-//              }).mouseout(function(outEvt) {
-//                console.debug(this, outEvt);
-//              });
-//        }
-//    });
-    
-    
-    
-    
-    
-    $(document).on('htmlContentLoadComplete', function (e) {
-        console.debug(e);
-    });
-
-    
     
     KeyBindingManager.addBinding(MY_COMMAND_ID_FORWARD, "Ctrl-Alt-E");
     KeyBindingManager.addBinding(MY_COMMAND_ID_BACK, "Ctrl-Alt-W");
-//    KeyBindingManager.addBinding(MY_COMMAND_ID_CLICK, "Alt");
-
 });
