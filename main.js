@@ -19,7 +19,7 @@ define(function (require, exports, module) {
         NO_DEFINITION_MATCH     = "No Definition match";
 
 
-    // Function to run when the menu item is clicked
+    
     function handleGoToForward(functionObj, cmPos) {
         
         var editor = EditorManager.getFocusedEditor(),
@@ -57,7 +57,7 @@ define(function (require, exports, module) {
         if (selectedText.functionName !== null) {
             storageStack.push(storage);
             findFunctionFile(selectedText.functionName).done(function () {
-                console.debug(arguments);
+                
             }).fail(function (err) {
                 _handleInvalid(err.reason);
             });
@@ -94,11 +94,9 @@ define(function (require, exports, module) {
         if (!/\S/.test(token.string) || token.string === ".") {
             token = hostEditor._codeMirror.getTokenAt({line: pos.line, ch: pos.ch + 1}, true);
         }
-
+        
         // Return valid function expressions only (function call or reference)
-        if (!((token.type === "variable") ||
-              (token.type === "variable-2") ||
-              (token.type === "property"))) {
+        if (!isValidToken(token.type)) {
             return {
                 functionName: null,
                 reason: FUNCTION_NAME_INVALID
@@ -112,26 +110,21 @@ define(function (require, exports, module) {
     }
     
     function findFunctionFile (functionName) {
-        
         var helper = brackets._jsCodeHintsHelper;
         if (helper === null) {
             return null;
         }
-
         var result = new $.Deferred();
-
         var response = helper();
         if (response.hasOwnProperty("promise")) {
             response.promise.done(function (jumpResp) {
                 var resolvedPath = jumpResp.fullPath;
                 if (resolvedPath) {
-
                     // Tern doesn't always return entire function extent.
                     // Use QuickEdit search now that we know which file to look at.
                     var fileInfos = [];
                     fileInfos.push({name: jumpResp.resultFile, fullPath: resolvedPath});
-                    JSUtils.findMatchingFunctions(functionName, fileInfos, true)
-                        .done(function (functions) {
+                    JSUtils.findMatchingFunctions(functionName, fileInfos, true).done(function (functions) {
                             if (functions && functions.length > 0) {
                                 // TODO - issue with setting the ch value. so the ursor will be in ch:0
                                 var cursorPos = {line: functions[0].lineStart};
@@ -141,13 +134,11 @@ define(function (require, exports, module) {
                                 // No matching functions were found
                                 result.reject({reason: NO_DEFINITION_MATCH});
                             }
-                        })
-                        .fail(function () {
+                        }).fail(function () {
                             result.reject();
                         });
-
-                } else {        // no result from Tern.  Fall back to _findInProject().
-
+                } else {
+                    // no result from Tern.  Fall back to _findInProject().
                     _findInProject(functionName).done(function (functions) {
                         if (functions && functions.length > 0) {
                             // TODO - issue with setting the ch value. so the ursor will be in ch:0
@@ -162,11 +153,9 @@ define(function (require, exports, module) {
                         result.reject(reason);
                     });
                 }
-
             }).fail(function () {
                 result.reject();
             });
-
         }
 
         return result.promise();
@@ -224,6 +213,15 @@ define(function (require, exports, module) {
      */
     function _handleInvalid (reason) {
         console.debug('Failed to load the definitions : \n',reason);
+        EditorManager._toggleInlineWidget(_inlineEditProviders, Strings.ERROR_QUICK_EDIT_PROVIDER_NOT_FOUND);
+        
+    }
+    
+    function isValidToken (type) {
+        if(type === 'property' || type === "variable" || type === "variable-2"){
+            return true;
+        }
+        return false;
     }
 
     
@@ -238,27 +236,43 @@ define(function (require, exports, module) {
     contextMenu.addMenuItem(MY_COMMAND_ID_FORWARD);
     contextMenu.addMenuItem(MY_COMMAND_ID_BACK);
     
+    
+    
     // adding the 
     AppInit.appReady(function () {
         // click listeners
         $("#editor-holder").on('click', function (e) {
             // verifying if the 'Alt' key is pressed and held.
             if(e.altKey){
-                
                 var editor = EditorManager.getFocusedEditor();
                 var cm = editor._codeMirror;
                 var cmPos = cm.coordsChar({
                     left:e.pageX, 
                     top:e.pageY
                 });
-                
                 var functionObj = cm.getTokenAt(cmPos);
-                
                 handleGoToForward(functionObj, cmPos);
+            }
+        });
+        
+        // highlighters 
+        $("#editor-holder").on('mousemove', function (e) {
+            // verifying if the 'Alt' key is pressed and held.
+            if(e.altKey){
+                var editor = EditorManager.getCurrentFullEditor() || EditorManager.getFocusedEditor();
+                var cm = editor._codeMirror;
+                var cmPos = cm.coordsChar({
+                    left:e.pageX, 
+                    top:e.pageY
+                });
+                var functionObj = cm.getTokenAt(cmPos);
+                if(isValidToken(functionObj.type)){
+                    var start = { line: cmPos.line, ch: functionObj.start };
+                    var end = { line: cmPos.line, ch: functionObj.end };
+                    editor.setSelection(start, end);
+                }
             }
         });
     });
     
-    KeyBindingManager.addBinding(MY_COMMAND_ID_FORWARD, "Ctrl-Alt-E");
-    KeyBindingManager.addBinding(MY_COMMAND_ID_BACK, "Ctrl-Alt-W");
 });
