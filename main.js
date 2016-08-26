@@ -6,6 +6,7 @@ define(function (require, exports, module) {
     "use strict";
 
     var CommandManager          = brackets.getModule("command/CommandManager"),
+        ExtensionUtils          = brackets.getModule("utils/ExtensionUtils"),
         Menus                   = brackets.getModule("command/Menus"),
         EditorManager           = brackets.getModule("editor/EditorManager"),
         KeyBindingManager       = brackets.getModule("command/KeyBindingManager"),
@@ -56,14 +57,29 @@ define(function (require, exports, module) {
         
         if (selectedText.functionName !== null) {
             storageStack.push(storage);
+            toggleGlassWindow(true);
             findFunctionFile(selectedText.functionName).done(function () {
-                
+                toggleGlassWindow();
             }).fail(function (err) {
+                toggleGlassWindow();
                 _handleInvalid(err.reason);
             });
+            
         }else{
+//            toggleGlassWindow();
             _handleInvalid(selectedText.reason);
         }
+    }
+    
+    function toggleGlassWindow(show) {
+        if(show){
+            if(!$("#editor-holder").hasClass('glass-window')){
+                $("#editor-holder").addClass('glass-window');
+            }
+        }else{
+            $("#editor-holder").removeClass('glass-window');
+        }
+        
     }
     
     function handleGoToBack() {
@@ -72,8 +88,12 @@ define(function (require, exports, module) {
             var filePath = memory.file.fullPath;
             var ch = memory.pos.ch;
             var line = memory.pos.line;
+            toggleGlassWindow(true);
             FileViewController.openFileAndAddToWorkingSet(filePath).done(function () {
+                toggleGlassWindow();
                 EditorManager.getCurrentFullEditor().setCursorPos(line, ch, true);
+            }).fail(function () {
+                toggleGlassWindow();
             });
         }
     } 
@@ -241,6 +261,7 @@ define(function (require, exports, module) {
     
     // adding the 
     AppInit.appReady(function () {
+        ExtensionUtils.loadStyleSheet(module, "styles/goto-definitions.css");
         // click listeners
         $("#editor-holder").on('click', function (e) {
             // verifying if the 'Alt' key is pressed and held.

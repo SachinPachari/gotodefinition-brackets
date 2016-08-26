@@ -1,0 +1,16 @@
+.glass-window {
+    /* Absolutely position it, but stretch it to all four corners, then put it just behind #search's z-index */
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  z-index: 99;
+
+  /* Pull the background 70px higher to the same place as #bg's */
+  background-position: center -70px;
+
+  -webkit-filter: blur(1px);
+  filter: url('/media/blur.svg#blur');
+  filter: blur(1px);
+}
