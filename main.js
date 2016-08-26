@@ -213,7 +213,8 @@ define(function (require, exports, module) {
      */
     function _handleInvalid (reason) {
         console.debug('Failed to load the definitions : \n',reason);
-        EditorManager._toggleInlineWidget(_inlineEditProviders, Strings.ERROR_QUICK_EDIT_PROVIDER_NOT_FOUND);
+//        EditorManager._toggleInlineWidget(_inlineEditProviders, Strings.ERROR_QUICK_EDIT_PROVIDER_NOT_FOUND);
+        
         
     }
     
