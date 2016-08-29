@@ -56,22 +56,23 @@ define(function (require, exports, module) {
         }
         
         if (selectedText.functionName !== null) {
-            storageStack.push(storage);
-            toggleGlassWindow(true);
-            findFunctionFile(selectedText.functionName).done(function () {
-                toggleGlassWindow();
+            
+            _toggleGlassWindow(true);
+            _findFunctionFile(selectedText.functionName).done(function () {
+                storageStack.push(storage);
+                _toggleGlassWindow();
             }).fail(function (err) {
-                toggleGlassWindow();
+                _toggleGlassWindow();
                 _handleInvalid(err.reason);
             });
             
         }else{
-//            toggleGlassWindow();
+//            _toggleGlassWindow();
             _handleInvalid(selectedText.reason);
         }
     }
     
-    function toggleGlassWindow(show) {
+    function _toggleGlassWindow(show) {
         if(show){
             if(!$("#editor-holder").hasClass('glass-window')){
                 $("#editor-holder").addClass('glass-window');
@@ -116,7 +117,7 @@ define(function (require, exports, module) {
         }
         
         // Return valid function expressions only (function call or reference)
-        if (!isValidToken(token.type)) {
+        if (!_isValidToken(token.type)) {
             return {
                 functionName: null,
                 reason: FUNCTION_NAME_INVALID
@@ -129,7 +130,7 @@ define(function (require, exports, module) {
         };
     }
     
-    function findFunctionFile (functionName) {
+    function _findFunctionFile (functionName) {
         var helper = brackets._jsCodeHintsHelper;
         if (helper === null) {
             return null;
@@ -238,7 +239,7 @@ define(function (require, exports, module) {
         
     }
     
-    function isValidToken (type) {
+    function _isValidToken (type) {
         if(type === 'property' || type === "variable" || type === "variable-2"){
             return true;
         }
@@ -261,8 +262,9 @@ define(function (require, exports, module) {
     
     // adding the 
     AppInit.appReady(function () {
+        // load stylesheet.
         ExtensionUtils.loadStyleSheet(module, "styles/goto-definitions.css");
-        // click listeners
+        // bind click listeners.
         $("#editor-holder").on('click', function (e) {
             // verifying if the 'Alt' key is pressed and held.
             if(e.altKey){
@@ -277,7 +279,7 @@ define(function (require, exports, module) {
             }
         });
         
-        // highlighters 
+        // bind hover linsteners  
         $("#editor-holder").on('mousemove', function (e) {
             // verifying if the 'Alt' key is pressed and held.
             if(e.altKey){
@@ -288,7 +290,7 @@ define(function (require, exports, module) {
                     top:e.pageY
                 });
                 var functionObj = cm.getTokenAt(cmPos);
-                if(isValidToken(functionObj.type)){
+                if(_isValidToken(functionObj.type)){
                     var start = { line: cmPos.line, ch: functionObj.start };
                     var end = { line: cmPos.line, ch: functionObj.end };
                     editor.setSelection(start, end);
