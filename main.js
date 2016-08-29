@@ -3,21 +3,20 @@
 
 /** Simple extension that takes the curson to the definition of the method. */
 define(function (require, exports, module) {
-    "use strict";
+    'use strict';
 
-    var CommandManager          = brackets.getModule("command/CommandManager"),
-        ExtensionUtils          = brackets.getModule("utils/ExtensionUtils"),
-        Menus                   = brackets.getModule("command/Menus"),
-        EditorManager           = brackets.getModule("editor/EditorManager"),
-        KeyBindingManager       = brackets.getModule("command/KeyBindingManager"),
-        LanguageManager         = brackets.getModule("language/LanguageManager"),
-        JSUtils                 = brackets.getModule("language/JSUtils"),
-        FileViewController      = brackets.getModule("project/FileViewController"),
-        ProjectManager          = brackets.getModule("project/ProjectManager"),
-        AppInit                 = brackets.getModule("utils/AppInit"),
+    var CommandManager          = brackets.getModule('command/CommandManager'),
+        ExtensionUtils          = brackets.getModule('utils/ExtensionUtils'),
+        Menus                   = brackets.getModule('command/Menus'),
+        EditorManager           = brackets.getModule('editor/EditorManager'),
+        LanguageManager         = brackets.getModule('language/LanguageManager'),
+        JSUtils                 = brackets.getModule('language/JSUtils'),
+        FileViewController      = brackets.getModule('project/FileViewController'),
+        ProjectManager          = brackets.getModule('project/ProjectManager'),
+        AppInit                 = brackets.getModule('utils/AppInit'),
         storageStack            = [],
-        FUNCTION_NAME_INVALID   = "Invalid Function Name",
-        NO_DEFINITION_MATCH     = "No Definition match";
+        FUNCTION_NAME_INVALID   = 'Invalid Function Name',
+        NO_DEFINITION_MATCH     = 'No Definition match';
 
 
     
@@ -34,7 +33,7 @@ define(function (require, exports, module) {
             storage;
         
         // Only provide a JavaScript editor when cursor is in JavaScript content
-        if (editor.getModeForSelection() !== "javascript") {
+        if (editor.getModeForSelection() !== 'javascript') {
             return null;
         }
         
@@ -89,12 +88,12 @@ define(function (require, exports, module) {
             var filePath = memory.file.fullPath;
             var ch = memory.pos.ch;
             var line = memory.pos.line;
-            toggleGlassWindow(true);
+            _toggleGlassWindow(true);
             FileViewController.openFileAndAddToWorkingSet(filePath).done(function () {
-                toggleGlassWindow();
+                _toggleGlassWindow();
                 EditorManager.getCurrentFullEditor().setCursorPos(line, ch, true);
             }).fail(function () {
-                toggleGlassWindow();
+                _toggleGlassWindow();
             });
         }
     } 
@@ -112,7 +111,7 @@ define(function (require, exports, module) {
 
         // If the pos is at the beginning of a name, token will be the
         // preceding whitespace or dot. In that case, try the next pos.
-        if (!/\S/.test(token.string) || token.string === ".") {
+        if (!/\S/.test(token.string) || token.string === '.') {
             token = hostEditor._codeMirror.getTokenAt({line: pos.line, ch: pos.ch + 1}, true);
         }
         
@@ -144,7 +143,7 @@ define(function (require, exports, module) {
         }
         var result = new $.Deferred();
         var response = helper();
-        if (response.hasOwnProperty("promise")) {
+        if (response.hasOwnProperty('promise')) {
             response.promise.done(function (jumpResp) {
                 var resolvedPath = jumpResp.fullPath;
                 if (resolvedPath) {
@@ -256,7 +255,7 @@ define(function (require, exports, module) {
      * @return boolean
      */
     function _isValidToken (type) {
-        if(type === 'property' || type === "variable" || type === "variable-2"){
+        if(type === 'property' || type === 'variable' || type === 'variable-2'){
             return true;
         }
         return false;
@@ -269,20 +268,20 @@ define(function (require, exports, module) {
      */
     function _toggleGlassWindow(show) {
         if(show){
-            if(!$("#editor-holder").hasClass('glass-window')){
-                $("#editor-holder").addClass('glass-window');
+            if(!$('#editor-holder').hasClass('glass-window')){
+                $('#editor-holder').addClass('glass-window');
             }
         }else{
-            $("#editor-holder").removeClass('glass-window');
+            $('#editor-holder').removeClass('glass-window');
         }
     }
 
     
     // First, register a command - a UI-less object associating an id to a handler
-    var MY_COMMAND_ID_FORWARD = "sachin.clicktogotodefinition.forward";
-    CommandManager.register("Navigate To Definition", MY_COMMAND_ID_FORWARD, handleGoToForward);
-    var MY_COMMAND_ID_BACK = "sachin.clicktogotodefinition.backward";
-    CommandManager.register("Go Back", MY_COMMAND_ID_BACK, handleGoToBack);
+    var MY_COMMAND_ID_FORWARD = 'sachin.clicktogotodefinition.forward';
+    CommandManager.register('Navigate To Definition', MY_COMMAND_ID_FORWARD, handleGoToForward);
+    var MY_COMMAND_ID_BACK = 'sachin.clicktogotodefinition.backward';
+    CommandManager.register('Go Back', MY_COMMAND_ID_BACK, handleGoToBack);
 
     // adding to context menu since it can help user to go back also.
     var contextMenu = Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU);
@@ -294,9 +293,9 @@ define(function (require, exports, module) {
     // adding the 
     AppInit.appReady(function () {
         // load stylesheet.
-        ExtensionUtils.loadStyleSheet(module, "styles/goto-definitions.css");
+        ExtensionUtils.loadStyleSheet(module, 'styles/goto-definitions.css');
         // bind click listeners.
-        $("#editor-holder").on('click', function (e) {
+        $('#editor-holder').on('click', function (e) {
             // verifying if the 'Alt' key is pressed and held.
             if(e.altKey){
                 var editor = EditorManager.getFocusedEditor();
@@ -311,7 +310,7 @@ define(function (require, exports, module) {
         });
         
         // bind hover linsteners  
-        $("#editor-holder").on('mousemove', function (e) {
+        $('#editor-holder').on('mousemove', function (e) {
             // verifying if the 'Alt' key is pressed and held.
             if(e.altKey){
                 var editor = EditorManager.getCurrentFullEditor() || EditorManager.getFocusedEditor();
