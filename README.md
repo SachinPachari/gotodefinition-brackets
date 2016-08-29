@@ -14,6 +14,7 @@ An extension for [Brackets](https://github.com/adobe/brackets/) which allows use
 ### How to Use Extension
 1. Press and hold "Alt" button, and click on the method.
 2. Right click on a method and select "Navigate To Definition" from the context menu.
+3. Also if the user can back to the origin, by right clicking in the editor and slecting "Go Back". 
 
 
 ### License
