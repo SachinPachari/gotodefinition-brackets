@@ -21,6 +21,12 @@ define(function (require, exports, module) {
 
 
     
+    /**
+     * Handler take the user to selected/clicked function.
+     * 
+     * @param {ch : number} functionObj
+     * @param {line : number} cmPos
+     */
     function handleGoToForward(functionObj, cmPos) {
         
         var editor = EditorManager.getFocusedEditor(),
@@ -72,17 +78,11 @@ define(function (require, exports, module) {
         }
     }
     
-    function _toggleGlassWindow(show) {
-        if(show){
-            if(!$("#editor-holder").hasClass('glass-window')){
-                $("#editor-holder").addClass('glass-window');
-            }
-        }else{
-            $("#editor-holder").removeClass('glass-window');
-        }
-        
-    }
     
+    /**
+     * Handler to go to earlier navigation. 
+     * 
+     */
     function handleGoToBack() {
         if(storageStack.length > 0){
             var memory = storageStack.pop();
@@ -130,6 +130,13 @@ define(function (require, exports, module) {
         };
     }
     
+    
+    /**
+     * Find the function declaration in the open filse or project.
+     *
+     * @param {!string} functionName
+     * @return {$.Promise} a promise that will be resolved with an array of function offset information
+     */
     function _findFunctionFile (functionName) {
         var helper = brackets._jsCodeHintsHelper;
         if (helper === null) {
@@ -183,9 +190,13 @@ define(function (require, exports, module) {
     }
     
     
-    /*
-    
-    */
+    /**
+     * @private
+     * Finds the function in the open project folder and sub-folders
+     * 
+     * @param {!string} functionName
+     * @return {$.Promise} a promise that will be resolved with an array of function offset information
+     */
     function _findInProject(functionName) {
         var result = new $.Deferred();
 
@@ -219,7 +230,7 @@ define(function (require, exports, module) {
     }
     
     /**
-     * Set the cursor in a specific Position
+     * Set the cursor in a specific Position by scrolling to the give line.
      * 
      * @param cursorPos {!{line:number, ch:number}}
      */
@@ -228,22 +239,42 @@ define(function (require, exports, module) {
     }
     
     /**
-     * Show info regarding the failure
+     * Show info regarding the failure 
      * 
-     * @param cursorPos {!{line:number, ch:number}}
+     * @param {!string} reason
      */
     function _handleInvalid (reason) {
         console.debug('Failed to load the definitions : \n',reason);
 //        EditorManager._toggleInlineWidget(_inlineEditProviders, Strings.ERROR_QUICK_EDIT_PROVIDER_NOT_FOUND);
-        
-        
+ 
     }
     
+    /**
+     * Validate the token value in the editor.
+     * 
+     * @param {!string} type
+     * @return boolean
+     */
     function _isValidToken (type) {
         if(type === 'property' || type === "variable" || type === "variable-2"){
             return true;
         }
         return false;
+    }
+    
+    /**
+     * toggle the glass window css to be shown during the loading.
+     * 
+     * @param {boolean} show
+     */
+    function _toggleGlassWindow(show) {
+        if(show){
+            if(!$("#editor-holder").hasClass('glass-window')){
+                $("#editor-holder").addClass('glass-window');
+            }
+        }else{
+            $("#editor-holder").removeClass('glass-window');
+        }
     }
 
     
