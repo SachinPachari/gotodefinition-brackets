@@ -269,6 +269,10 @@ define(function (require, exports, module) {
         return false;
     }
     
+    function _isLastChForLine (functionObj) {
+        
+    }
+    
     /**
      * toggle the glass window css to be shown during the loading.
      * 
@@ -305,7 +309,7 @@ define(function (require, exports, module) {
         // bind click listeners.
         $('#editor-holder').on('click', function (e) {
             // verifying if the 'Alt' key is pressed and held.
-            if(e.altKey){
+            if(e.ctrlKey){
                 var editor = EditorManager.getFocusedEditor();
                 var cm = editor._codeMirror;
                 var cmPos = cm.coordsChar({
@@ -320,7 +324,7 @@ define(function (require, exports, module) {
         // bind hover linsteners  
         $('#editor-holder').on('mousemove', function (e) {
             // verifying if the 'Alt' key is pressed and held.
-            if(e.altKey){
+            if(e.ctrlKey){
                 var editor = EditorManager.getCurrentFullEditor() || EditorManager.getFocusedEditor();
                 var cm = editor._codeMirror;
                 var cmPos = cm.coordsChar({
