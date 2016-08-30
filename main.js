@@ -63,13 +63,21 @@ define(function (require, exports, module) {
         if (selectedText.functionName !== null) {
             
             _toggleGlassWindow(true);
-            _findFunctionFile(selectedText.functionName).done(function () {
-                storageStack.push(storage);
+            try{
+                _findFunctionFile(selectedText.functionName).done(function () {
+                    storageStack.push(storage);
+                    _toggleGlassWindow();
+                }).fail(function (err) {
+                    _toggleGlassWindow();
+                    _handleInvalid(err.reason);
+                });    
+            }catch(err){
+                console.error(err);
+                // handle the hiding of glass window.
+                // just in case
                 _toggleGlassWindow();
-            }).fail(function (err) {
-                _toggleGlassWindow();
-                _handleInvalid(err.reason);
-            });
+            }
+            
             
         }else{
 //            _toggleGlassWindow();
