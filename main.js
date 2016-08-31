@@ -14,10 +14,14 @@ define(function (require, exports, module) {
         FileViewController      = brackets.getModule('project/FileViewController'),
         ProjectManager          = brackets.getModule('project/ProjectManager'),
         AppInit                 = brackets.getModule('utils/AppInit'),
+//        HighlightAgent          = brackets.getModule('LiveDevelopment/Agents/HighlightAgent'),
+//        DOMNode                 = brackets.getModule('LiveDevelopment/Agents/DOMNode'),
+//        DOMAgent                = brackets.getModule('LiveDevelopment/Agents/DOMAgent'),
         storageStack            = [],
+        posHelper               = {},
         FUNCTION_NAME_INVALID   = 'Invalid Function Name',
-        NO_DEFINITION_MATCH     = 'No Definition match';
-
+        NO_DEFINITION_MATCH     = 'No Definition match',
+        CLASS_NAME              = 'jump-to-text-marker';
 
     
     /**
@@ -61,7 +65,6 @@ define(function (require, exports, module) {
         }
         
         if (selectedText.functionName !== null) {
-            
             _toggleGlassWindow(true);
             try{
                 _findFunctionFile(selectedText.functionName).done(function () {
@@ -73,14 +76,10 @@ define(function (require, exports, module) {
                 });    
             }catch(err){
                 console.error(err);
-                // handle the hiding of glass window.
-                // just in case
+                // handle the hiding of glass window. in case of some errors
                 _toggleGlassWindow();
             }
-            
-            
         }else{
-//            _toggleGlassWindow();
             _handleInvalid(selectedText.reason);
         }
     }
@@ -252,6 +251,8 @@ define(function (require, exports, module) {
      */
     function _handleInvalid (reason) {
         console.debug('Failed to load the definitions : \n',reason);
+        var editor = EditorManager.getCurrentFullEditor() || EditorManager.getFocusedEditor();
+        editor.displayErrorMessageAtCursor(reason);
 //        EditorManager._toggleInlineWidget(_inlineEditProviders, Strings.ERROR_QUICK_EDIT_PROVIDER_NOT_FOUND);
  
     }
@@ -310,13 +311,14 @@ define(function (require, exports, module) {
         $('#editor-holder').on('click', function (e) {
             // verifying if the 'Alt' key is pressed and held.
             if(e.ctrlKey){
-                var editor = EditorManager.getFocusedEditor();
+                var editor = EditorManager.getCurrentFullEditor();
                 var cm = editor._codeMirror;
                 var cmPos = cm.coordsChar({
                     left:e.pageX, 
                     top:e.pageY
                 });
                 var functionObj = cm.getTokenAt(cmPos);
+                _removeTextmarkers(editor);
                 handleGoToForward(functionObj, cmPos);
             }
         });
@@ -325,7 +327,7 @@ define(function (require, exports, module) {
         $('#editor-holder').on('mousemove', function (e) {
             // verifying if the 'Alt' key is pressed and held.
             if(e.ctrlKey){
-                var editor = EditorManager.getCurrentFullEditor() || EditorManager.getFocusedEditor();
+                var editor = EditorManager.getCurrentFullEditor();
                 var cm = editor._codeMirror;
                 var cmPos = cm.coordsChar({
                     left:e.pageX, 
@@ -335,10 +337,42 @@ define(function (require, exports, module) {
                 if(_isValidToken(functionObj.type)){
                     var start = { line: cmPos.line, ch: functionObj.start };
                     var end = { line: cmPos.line, ch: functionObj.end };
-                    editor.setSelection(start, end);
+                    _markTextHandler(editor, start, end, functionObj.string);
+                }else {
+                    _removeTextmarkers(editor);
                 }
             }
         });
+        
+//        $('#editor-holder').on('keyup', function (e) {
+//            console.info(e.keyCode);
+//        });
+        function _markTextHandler (editor, start, end, query) {
+            var cm = editor._codeMirror;
+            var allMarks = editor._codeMirror.doc.getAllMarks();
+            if(allMarks.length !== 0){
+                for(let i = 0, l=allMarks.length; i<l; i++){
+                    if(allMarks[i].className === CLASS_NAME)
+                    return;
+                }    
+            }
+            cm.doc.markText(start, end, {className: CLASS_NAME});
+        }
+        
+        function _removeTextmarkers (editor) {
+            if(editor === undefined){
+                return;
+            }
+            var allMarks = editor._codeMirror.doc.getAllMarks();
+            for(let i = 0, l=allMarks.length; i<l; i++){
+                if(allMarks[i].className === CLASS_NAME)
+                allMarks[i].clear();
+            }
+            
+//            $(editor._codeMirror.display.lineDiv).find('.jump-to-text-marker').each( function (idx, el) {
+//                $(el).removeClass('jump-to-text-marker');
+//            });
+        }
     });
     
 });
