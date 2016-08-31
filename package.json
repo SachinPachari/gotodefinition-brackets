@@ -13,7 +13,7 @@
         "definition",
 		"goto",
         "click",
-		"navigate",
+		"navigate"
     ],
     "engines": {
         "brackets": ">=0.38.0"
