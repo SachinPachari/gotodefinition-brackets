@@ -1,8 +1,8 @@
 {
     "name": "sachin.gotodefinition",
     "title": "Go to Definition",
-    "description": "Alt+click or(use context-menu) to jump to method declaration",
-    "version": "1.0.1",
+    "description": "Ctrl+click or(use context-menu) to jump to method declaration",
+    "version": "1.0.2",
     "author": "Sachin Pachari <sachin.fishersam@gmail.com> (https://github.com/SachinPachari)",
     "homepage": "https://github.com/SachinPachari/gotodefinition-brackets",
     "license": "MIT",
@@ -12,7 +12,8 @@
         "declaration",
         "definition",
 		"goto",
-		"navigate"
+        "click",
+		"navigate",
     ],
     "engines": {
         "brackets": ">=0.38.0"
