@@ -18,7 +18,6 @@ define(function (require, exports, module) {
 //        DOMNode                 = brackets.getModule('LiveDevelopment/Agents/DOMNode'),
 //        DOMAgent                = brackets.getModule('LiveDevelopment/Agents/DOMAgent'),
         storageStack            = [],
-        posHelper               = {},
         FUNCTION_NAME_INVALID   = 'Invalid Function Name',
         NO_DEFINITION_MATCH     = 'No Definition match',
         CLASS_NAME              = 'jump-to-text-marker';
@@ -270,10 +269,6 @@ define(function (require, exports, module) {
         return false;
     }
     
-    function _isLastChForLine (functionObj) {
-        
-    }
-    
     /**
      * toggle the glass window css to be shown during the loading.
      * 
@@ -344,34 +339,33 @@ define(function (require, exports, module) {
             }
         });
         
-//        $('#editor-holder').on('keyup', function (e) {
-//            console.info(e.keyCode);
-//        });
+        $('#editor-holder').on('keyup', function (e) {
+            if(e.keyCode === 17){
+                _removeTextmarkers();
+            }
+        });
         function _markTextHandler (editor, start, end, query) {
             var cm = editor._codeMirror;
             var allMarks = editor._codeMirror.doc.getAllMarks();
             if(allMarks.length !== 0){
-                for(let i = 0, l=allMarks.length; i<l; i++){
-                    if(allMarks[i].className === CLASS_NAME)
-                    return;
+                for(var i = 0, l=allMarks.length; i<l; i++){
+                    if(allMarks[i].className === CLASS_NAME){
+                        return;    
+                    }
                 }    
             }
             cm.doc.markText(start, end, {className: CLASS_NAME});
         }
         
         function _removeTextmarkers (editor) {
-            if(editor === undefined){
-                return;
-            }
+            editor = editor || EditorManager.getCurrentFullEditor();
             var allMarks = editor._codeMirror.doc.getAllMarks();
-            for(let i = 0, l=allMarks.length; i<l; i++){
-                if(allMarks[i].className === CLASS_NAME)
-                allMarks[i].clear();
+            for(var i = 0, l=allMarks.length; i<l; i++){
+                if(allMarks[i].className === CLASS_NAME){
+                    allMarks[i].clear();    
+                }
+                
             }
-            
-//            $(editor._codeMirror.display.lineDiv).find('.jump-to-text-marker').each( function (idx, el) {
-//                $(el).removeClass('jump-to-text-marker');
-//            });
         }
     });
     
