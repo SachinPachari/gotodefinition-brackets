@@ -18,6 +18,6 @@
     "engines": {
         "brackets": ">=1.5"
     },
-
-    "categories": ["editing", "general"],
+    "categories": ["editing", "general"]
+    
 }
