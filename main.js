@@ -10,18 +10,17 @@ define(function (require, exports, module) {
         Menus                   = brackets.getModule('command/Menus'),
         EditorManager           = brackets.getModule('editor/EditorManager'),
         LanguageManager         = brackets.getModule('language/LanguageManager'),
-        JSUtils                 = brackets.getModule('language/JSUtils'),
+        
         FileViewController      = brackets.getModule('project/FileViewController'),
         ProjectManager          = brackets.getModule('project/ProjectManager'),
         AppInit                 = brackets.getModule('utils/AppInit'),
-//        HighlightAgent          = brackets.getModule('LiveDevelopment/Agents/HighlightAgent'),
-//        DOMNode                 = brackets.getModule('LiveDevelopment/Agents/DOMNode'),
-//        DOMAgent                = brackets.getModule('LiveDevelopment/Agents/DOMAgent'),
         storageStack            = [],
         FUNCTION_NAME_INVALID   = 'Invalid Function Name',
         NO_DEFINITION_MATCH     = 'No Definition match',
         CLASS_NAME              = 'jump-to-text-marker';
-
+    
+    
+    var FileHelper = require('FileHelper');
     
     /**
      * Handler take the user to selected/clicked function.
@@ -46,14 +45,14 @@ define(function (require, exports, module) {
             if (sel.start.line !== sel.end.line) {
                 return null;
             }
-            selectedText = _getFunctionName(editor, sel.start);
+            selectedText = FileHelper.getFunctionName(editor, sel.start);
             storage = {
                 file: editor.getFile(), 
                 pos: sel.end
             };
             
         }else{
-            selectedText = _getFunctionName(editor, cmPos);
+            selectedText = FileHelper.getFunctionName(editor, cmPos);
             storage = {
                 file: editor.getFile(), 
                 pos: {
@@ -66,7 +65,7 @@ define(function (require, exports, module) {
         if (selectedText.functionName !== null) {
             _toggleGlassWindow(true);
             try{
-                _findFunctionFile(selectedText.functionName).done(function () {
+                FileHelper.findFunctionFile(selectedText.functionName).done(function () {
                     storageStack.push(storage);
                     _toggleGlassWindow();
                 }).fail(function (err) {
@@ -105,134 +104,10 @@ define(function (require, exports, module) {
     } 
     
     
-    /**
-     * Return the token string that is at the specified position.
-     *
-     * @param hostEditor {!Editor} editor
-     * @param {!{line:number, ch:number}} pos
-     * @return {functionName: string, reason: string}
-     */
-    function _getFunctionName(hostEditor, pos) {
-        var token = hostEditor._codeMirror.getTokenAt(pos, true);
-
-        // If the pos is at the beginning of a name, token will be the
-        // preceding whitespace or dot. In that case, try the next pos.
-        if (!/\S/.test(token.string) || token.string === '.') {
-            token = hostEditor._codeMirror.getTokenAt({line: pos.line, ch: pos.ch + 1}, true);
-        }
-        
-        // Return valid function expressions only (function call or reference)
-        if (!_isValidToken(token.type)) {
-            return {
-                functionName: null,
-                reason: FUNCTION_NAME_INVALID
-            };
-        }
-
-        return {
-            functionName: token.string,
-            reason: null
-        };
-    }
     
     
-    /**
-     * Find the function declaration in the open filse or project.
-     *
-     * @param {!string} functionName
-     * @return {$.Promise} a promise that will be resolved with an array of function offset information
-     */
-    function _findFunctionFile (functionName) {
-        var helper = brackets._jsCodeHintsHelper;
-        if (helper === null) {
-            return null;
-        }
-        var result = new $.Deferred();
-        var response = helper();
-        if (response.hasOwnProperty('promise')) {
-            response.promise.done(function (jumpResp) {
-                var resolvedPath = jumpResp.fullPath;
-                if (resolvedPath) {
-                    // Tern doesn't always return entire function extent.
-                    // Use QuickEdit search now that we know which file to look at.
-                    var fileInfos = [];
-                    fileInfos.push({name: jumpResp.resultFile, fullPath: resolvedPath});
-                    JSUtils.findMatchingFunctions(functionName, fileInfos, true).done(function (functions) {
-                            if (functions && functions.length > 0) {
-                                // TODO - issue with setting the ch value. so the ursor will be in ch:0
-                                var cursorPos = {line: functions[0].lineStart};
-                                _setCursorPosition(cursorPos);
-                                result.resolve(functions);
-                            } else {
-                                // No matching functions were found
-                                result.reject({reason: NO_DEFINITION_MATCH});
-                            }
-                        }).fail(function () {
-                            result.reject();
-                        });
-                } else {
-                    // no result from Tern.  Fall back to _findInProject().
-                    _findInProject(functionName).done(function (functions) {
-                        if (functions && functions.length > 0) {
-                            // TODO - issue with setting the ch value. so the ursor will be in ch:0
-                            var cursorPos = {line: functions[0].lineStart};
-                            _setCursorPosition(cursorPos);
-                            result.resolve(functions);
-                        } else {
-                            // No matching functions were found
-                            result.reject({reason: NO_DEFINITION_MATCH});
-                        }
-                    }).fail(function (reason) {
-                        result.reject(reason);
-                    });
-                }
-            }).fail(function () {
-                result.reject();
-            });
-        }
-
-        return result.promise();
-    }
     
     
-    /**
-     * @private
-     * Finds the function in the open project folder and sub-folders
-     * 
-     * @param {!string} functionName
-     * @return {$.Promise} a promise that will be resolved with an array of function offset information
-     */
-    function _findInProject(functionName) {
-        var result = new $.Deferred();
-
-        function _nonBinaryFileFilter(file) {
-            return !LanguageManager.getLanguageForPath(file.fullPath).isBinary();
-        }
-
-        ProjectManager.getAllFiles(_nonBinaryFileFilter)
-            .done(function (files) {
-                JSUtils.findMatchingFunctions(functionName, files)
-                    .done(function (functions) {
-                        // TODO - need to open the correct file. 
-                        if(functions.length === 0){
-                            result.reject({reason: NO_DEFINITION_MATCH});
-                            return;
-                        }
-                        var filePath = functions[0].document.file.fullPath;
-                        FileViewController.openFileAndAddToWorkingSet(filePath).done(function () {
-                            result.resolve(functions);
-                        });
-                    })
-                    .fail(function (reason) {
-                        result.reject(reason);
-                    });
-            })
-            .fail(function (reason) {
-                result.reject(reason);
-            });
-
-        return result.promise();
-    }
     
     /**
      * Set the cursor in a specific Position by scrolling to the give line.
@@ -350,7 +225,7 @@ define(function (require, exports, module) {
             if(allMarks.length !== 0){
                 for(var i = 0, l=allMarks.length; i<l; i++){
                     if(allMarks[i].className === CLASS_NAME){
-                        return;    
+                        return;
                     }
                 }    
             }
