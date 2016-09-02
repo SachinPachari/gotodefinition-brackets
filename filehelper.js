@@ -3,6 +3,10 @@ define(function (require, exports, module) {
     'use strict';
     
     var FUNCTION_NAME_INVALID   = 'Invalid Function Name',
+        NO_DEFINITION_MATCH     = 'No Definition match',
+        LanguageManager         = brackets.getModule('language/LanguageManager'),
+        ProjectManager          = brackets.getModule('project/ProjectManager'),
+        FileViewController      = brackets.getModule('project/FileViewController'),
         JSUtils                 = brackets.getModule('language/JSUtils');
     
     /**
@@ -60,8 +64,8 @@ define(function (require, exports, module) {
                     JSUtils.findMatchingFunctions(functionName, fileInfos, true).done(function (functions) {
                             if (functions && functions.length > 0) {
                                 // TODO - issue with setting the ch value. so the ursor will be in ch:0
-                                var cursorPos = {line: functions[0].lineStart};
-                                _setCursorPosition(cursorPos);
+//                                var cursorPos = {line: functions[0].lineStart};
+//                                _setCursorPosition(cursorPos);
                                 result.resolve(functions);
                             } else {
                                 // No matching functions were found
@@ -75,8 +79,8 @@ define(function (require, exports, module) {
                     findInProject(functionName).done(function (functions) {
                         if (functions && functions.length > 0) {
                             // TODO - issue with setting the ch value. so the ursor will be in ch:0
-                            var cursorPos = {line: functions[0].lineStart};
-                            _setCursorPosition(cursorPos);
+//                            var cursorPos = {line: functions[0].lineStart};
+//                            _setCursorPosition(cursorPos);
                             result.resolve(functions);
                         } else {
                             // No matching functions were found

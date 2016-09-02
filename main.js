@@ -9,14 +9,9 @@ define(function (require, exports, module) {
         ExtensionUtils          = brackets.getModule('utils/ExtensionUtils'),
         Menus                   = brackets.getModule('command/Menus'),
         EditorManager           = brackets.getModule('editor/EditorManager'),
-        LanguageManager         = brackets.getModule('language/LanguageManager'),
-        
-        FileViewController      = brackets.getModule('project/FileViewController'),
-        ProjectManager          = brackets.getModule('project/ProjectManager'),
         AppInit                 = brackets.getModule('utils/AppInit'),
+        FileViewController      = brackets.getModule('project/FileViewController'),
         storageStack            = [],
-        FUNCTION_NAME_INVALID   = 'Invalid Function Name',
-        NO_DEFINITION_MATCH     = 'No Definition match',
         CLASS_NAME              = 'jump-to-text-marker';
     
     
@@ -65,7 +60,9 @@ define(function (require, exports, module) {
         if (selectedText.functionName !== null) {
             _toggleGlassWindow(true);
             try{
-                FileHelper.findFunctionFile(selectedText.functionName).done(function () {
+                FileHelper.findFunctionFile(selectedText.functionName).done(function (funs) {
+                    var cursorPos = {line: funs[0].lineStart};
+                    _setCursorPosition(cursorPos);
                     storageStack.push(storage);
                     _toggleGlassWindow();
                 }).fail(function (err) {
