@@ -29,7 +29,7 @@ define(function (require, exports, module) {
         if (!Utils.isValidToken(token.type)) {
             return {
                 functionName: null,
-                reason: FUNCTION_NAME_INVALID
+                reason: Utils.FUNCTION_NAME_INVALID
             };
         }
 
@@ -120,7 +120,7 @@ define(function (require, exports, module) {
                 JSUtils.findMatchingFunctions(functionName, files)
                     .done(function (functions) {
                         if (functions.length === 0) {
-                            result.reject({reason: NO_DEFINITION_MATCH});
+                            result.reject({reason: Utils.NO_DEFINITION_MATCH});
                             return;
                         }
                         var filePath = functions[0].document.file.fullPath;
