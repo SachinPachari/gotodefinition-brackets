@@ -27,3 +27,5 @@ Tested on Brackets 1.7 to 1.8 on Windows 7.
 v1.0.0 - Primary Release. </br>
 v1.0.1 - Updated the jshint and fixed the glass window issue during the "go back". </br>
 v1.0.2 - Added inline error message display | "Ctrl" based selection | using highlighting (removed selection) </br>
+v1.0.3 - updated the package.json </br>
+v1.0.4 - refactored the code </br>
