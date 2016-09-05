@@ -10,7 +10,8 @@ define(function (require, exports, module) {
     var Utils               = require('src/Utils'),
         DefinitionHandler   = require('src/DefinitionHandler');
     
-    var editorId = '#editor-holder';
+    var editorId = '#editor-holder',
+        prevLine;
     
     
     function bindEvents() {
@@ -47,16 +48,26 @@ define(function (require, exports, module) {
         // verifying if the 'Ctrl' key is pressed and held.
         if (e.ctrlKey) {
             var editor = EditorManager.getCurrentFullEditor();
+            if(editor === undefined) {
+                return;
+            }
             var cm = editor._codeMirror;
             var cmPos = cm.coordsChar({
                 left: e.pageX,
                 top: e.pageY
             });
+            
             var functionObj = cm.getTokenAt(cmPos);
             if (Utils.isValidToken(functionObj.type)) {
                 var start = { line: cmPos.line, ch: functionObj.start };
                 var end = { line: cmPos.line, ch: functionObj.end };
-                _markTextHandler(editor, start, end, functionObj.string);
+                prevLine = cmPos.line;
+                if(cmPos.line !== prevLine){
+                    _markTextHandler(editor, start, end, functionObj.string);
+                }else{
+                    _removeTextmarkers(editor);
+                    _markTextHandler(editor, start, end, functionObj.string);
+                }
             } else {
                 _removeTextmarkers(editor);
             }

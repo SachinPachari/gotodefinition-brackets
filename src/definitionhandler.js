@@ -1,4 +1,4 @@
-/*global $, brackets, define */
+/*global $, brackets, define, console */
 define(function (require, exports, module) {
     'use strict';
     
@@ -7,8 +7,7 @@ define(function (require, exports, module) {
         storageStack            = [];
     
     // file imports 
-    var FileHelper  = require('src/FileHelper'),
-        Utils       = require('src/Utils');
+    var FileHelper  = require('src/FileHelper');
     
     /**
      * Handler take the user to selected/clicked function.
