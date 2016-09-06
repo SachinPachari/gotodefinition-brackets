@@ -6,8 +6,8 @@ define(function (require, exports, module) {
     var EditorManager           = brackets.getModule('editor/EditorManager'),
         storageStack            = [];
     
-    // file imports 
-    var FileHelper  = require('src/FileHelper');
+    // file imports check for file in src folder
+    var FileHelper  = require('src/filehelper');
     
     /**
      * Handler take the user to selected/clicked function.

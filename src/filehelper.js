@@ -2,12 +2,14 @@
 define(function (require, exports, module) {
     'use strict';
     
+    // module imports
     var LanguageManager         = brackets.getModule('language/LanguageManager'),
         ProjectManager          = brackets.getModule('project/ProjectManager'),
         FileViewController      = brackets.getModule('project/FileViewController'),
         JSUtils                 = brackets.getModule('language/JSUtils');
         
-    var Utils = require('src/Utils');
+    // file imports check for file in src folder
+    var Utils = require('src/utils');
     
     /**
      * Return the token string that is at the specified position.

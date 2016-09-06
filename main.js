@@ -11,9 +11,9 @@ define(function (require, exports, module) {
         AppInit                 = brackets.getModule('utils/AppInit');
         
     
-    // file imports
-    var EventBinder         = require('src/MouseEventBinder'),
-        DefinitionHandler   = require('src/DefinitionHandler');
+    // file imports check for file in src folder
+    var EventBinder         = require('src/mouseeventbinder'),
+        DefinitionHandler   = require('src/definitionhandler');
         
     
     // binding all events on the appReady event

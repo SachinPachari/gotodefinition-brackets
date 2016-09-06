@@ -6,9 +6,9 @@ define(function (require, exports, module) {
     var ExtensionUtils          = brackets.getModule('utils/ExtensionUtils'),
         EditorManager           = brackets.getModule('editor/EditorManager');
     
-    // file imports 
-    var Utils               = require('src/Utils'),
-        DefinitionHandler   = require('src/DefinitionHandler');
+    // file imports check for file in src folder
+    var Utils               = require('src/utils'),
+        DefinitionHandler   = require('src/definitionhandler');
     
     var editorId = '#editor-holder',
         prevLine;
