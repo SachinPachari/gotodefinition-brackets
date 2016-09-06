@@ -1,5 +1,5 @@
 {
-    "name": "gotodefinition-brackets",
+    "name": "sachin.gotodefinition",
     "title": "Go to Definition",
     "description": "Ctrl+click or(use context-menu) to jump to method declaration",
     "version": "1.0.4",
