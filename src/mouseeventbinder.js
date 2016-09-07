@@ -4,7 +4,8 @@ define(function (require, exports, module) {
     
     // module imports 
     var ExtensionUtils          = brackets.getModule('utils/ExtensionUtils'),
-        EditorManager           = brackets.getModule('editor/EditorManager');
+        EditorManager           = brackets.getModule('editor/EditorManager'),
+        DocumentManager         = brackets.getModule('document/DocumentManager');
     
     // file imports check for file in src folder
     var Utils               = require('src/utils'),
@@ -23,8 +24,24 @@ define(function (require, exports, module) {
         $(editorId).on('mousemove', moveListener);
         // bind "ctrl" up key to remove all markers
         $(editorId).on('keyup', ctrlUpListener);
+        // to remove the markers while opening a new file.
+        DocumentManager.on('currentDocumentChange', onDocumentChanged);
     }
     
+    
+     /**
+     * onDocumentChanged Handler to ensure the markers are removed in the old file.
+     * this is mainly due to that the old file markers were left behind and not removed.
+     * 
+     * @param jQuery event 
+     */
+    
+    function onDocumentChanged(eventObj, toDoc, fromDoc) {
+        if(fromDoc !== undefined && fromDoc !== null){
+            _removeTextmarkers(fromDoc._masterEditor);    
+        }
+    }
+                           
     
     /**
      * Handler for keyUp verifies only 'Ctrl' key
