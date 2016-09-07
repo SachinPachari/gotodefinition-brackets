@@ -1,6 +1,6 @@
-Brackets gotodefinition
+Brackets gotodefinition 
 ============================
-#  for Brackets
+
 An extension for [Brackets](https://github.com/adobe/brackets/) which allows user to Ctrl+click on the method to navigate to the method declaration.
 
 ### How to Install
