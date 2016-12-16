@@ -1,7 +1,7 @@
 Brackets gotodefinition 
 ============================
 
-An extension for [Brackets](https://github.com/adobe/brackets/) which allows user to Ctrl+click on the method to navigate to the method declaration.
+An extension for [Brackets](https://github.com/adobe/brackets/) which allows user to Ctrl+click on the method to navigate to the method declaration, with respect to issue [9456](https://github.com/adobe/brackets/issues/9456).
 
 ### How to Install
 1. Select **File > Extension Manager...**
