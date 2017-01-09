@@ -50,10 +50,14 @@ define(function (require, exports, module) {
      */
     
     function ctrlUpListener(e) {
-        if (e.keyCode === 17) {
+        if (e.keyCode === 17 || isCmdKey(e.keyCode)) {
             _removeTextmarkers();
         }
     }
+	
+	function isCmdKey (kC) {
+		return kC === 91 || kC === 93 || kC === 224;
+	}
        
     /**
      * Handler mouse hover
@@ -63,7 +67,7 @@ define(function (require, exports, module) {
     
     function moveListener(e) {
         // verifying if the 'Ctrl' key is pressed and held.
-        if (e.ctrlKey) {
+        if (e.ctrlKey || isCmdKey(e.keyCode)) {
             var editor = EditorManager.getCurrentFullEditor();
             if(editor === undefined) {
                 return;
@@ -100,7 +104,7 @@ define(function (require, exports, module) {
     
     function clickListener(e) {
         // verifying if the 'Ctrl' key is pressed and held.
-        if (e.ctrlKey) {
+        if (e.ctrlKey || isCmdKey(e.keyCode)) {
             var editor = EditorManager.getCurrentFullEditor();
             var cm = editor._codeMirror;
             var cmPos = cm.coordsChar({
