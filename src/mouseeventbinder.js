@@ -22,8 +22,8 @@ define(function (require, exports, module) {
         $(editorId).on('click', clickListener);
         // bind hover linsteners  
         $(editorId).on('mousemove', moveListener);
-        // bind "ctrl" up key to remove all markers
-        $(editorId).on('keyup', ctrlUpListener);
+        // bind "ctrl/cmd" up key to remove all markers
+        $(editorId).on('keyup', keyUpListener);
         // to remove the markers while opening a new file.
         DocumentManager.on('currentDocumentChange', onDocumentChanged);
     }
@@ -44,12 +44,12 @@ define(function (require, exports, module) {
                            
     
     /**
-     * Handler for keyUp verifies only 'Ctrl' key
+     * Handler for keyUp verifies only 'Ctrl/Cmd' key
      * 
      * @param jQuery event 
      */
     
-    function ctrlUpListener(e) {
+    function keyUpListener(e) {
         if (e.keyCode === 17 || e.keyCode === 91) {
             _removeTextmarkers();
         }
@@ -70,7 +70,7 @@ define(function (require, exports, module) {
      */
     
     function moveListener(e) {
-        // verifying if the 'Ctrl' key is pressed and held.
+        // verifying if the 'Ctrl/Cmd' key is pressed and held.
         if ((isCmdOrCtrlKey(e) && !e.shiftKey)) {
             var editor = EditorManager.getCurrentFullEditor();
             if(editor === undefined) {
@@ -110,7 +110,7 @@ define(function (require, exports, module) {
      */
     
     function clickListener(e) {
-        // verifying if the 'Ctrl' key is pressed and held.
+        // verifying if the 'Ctrl/Cmd' key is pressed and held.
         if ((isCmdOrCtrlKey(e) && !e.shiftKey)) {
             var editor = EditorManager.getCurrentFullEditor();
             var cm = editor._codeMirror;
