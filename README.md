@@ -29,3 +29,4 @@ v1.0.1 - Updated the jshint and fixed the glass window issue during the "go back
 v1.0.2 - Added inline error message display | "Ctrl" based selection | using highlighting (removed selection) </br>
 v1.0.3 - updated the package.json </br>
 v1.0.4 - refactored the code </br>
+v1.0.5 - fixed the issue with Mac OS </br>
