@@ -112,7 +112,6 @@ define(function (require, exports, module) {
         var editor = EditorManager.getCurrentFullEditor() || EditorManager.getFocusedEditor();
         editor.displayErrorMessageAtCursor(reason);
 //        EditorManager._toggleInlineWidget(_inlineEditProviders, Strings.ERROR_QUICK_EDIT_PROVIDER_NOT_FOUND);
- 
     }
     
     /**
