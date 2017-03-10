@@ -6,10 +6,14 @@ define(function (require, exports, module) {
     var LanguageManager         = brackets.getModule('language/LanguageManager'),
         ProjectManager          = brackets.getModule('project/ProjectManager'),
         FileViewController      = brackets.getModule('project/FileViewController'),
-        JSUtils                 = brackets.getModule('language/JSUtils');
+        JSUtils                 = brackets.getModule('language/JSUtils'),
+        TokenUtils              = brackets.getModule('utils/TokenUtils'),
+        DropdownButton          = brackets.getModule('widgets/DropdownButton').DropdownButton;
+    
         
     // file imports check for file in src folder
     var Utils = require('src/utils');
+    var SuggestionList      = require('src/suggestionlist');
     
     /**
      * Return the token string that is at the specified position.
@@ -19,12 +23,15 @@ define(function (require, exports, module) {
      * @return {functionName: string, reason: string}
      */
     function getFunctionName(hostEditor, pos) {
-        var token = hostEditor._codeMirror.getTokenAt(pos, true);
+        
+//        var token = hostEditor._codeMirror.getTokenAt(pos, true);
+        var cm = hostEditor._codeMirror;
+        var token = TokenUtils.getTokenAt(cm, pos, true);
 
         // If the pos is at the beginning of a name, token will be the
         // preceding whitespace or dot. In that case, try the next pos.
         if (!/\S/.test(token.string) || token.string === '.') {
-            token = hostEditor._codeMirror.getTokenAt({line: pos.line, ch: pos.ch + 1}, true);
+            token = TokenUtils.getTokenAt(cm, {line: pos.line, ch: pos.ch + 1}, true);
         }
         
         // Return valid function expressions only (function call or reference)
@@ -65,11 +72,7 @@ define(function (require, exports, module) {
                     fileInfos.push({name: jumpResp.resultFile, fullPath: resolvedPath});
                     JSUtils.findMatchingFunctions(functionName, fileInfos, true).done(function (functions) {
                         if (functions && functions.length > 0) {
-                            var filePath = functions[0].document.file.fullPath;
-                            openFile(filePath).done(function () {
-                                result.resolve(functions);
-                            });
-                            result.resolve(functions);
+                            processFunctions(functions, result);
                         } else {
                             // No matching functions were found
                             result.reject({reason: Utils.NO_DEFINITION_MATCH});
@@ -81,11 +84,7 @@ define(function (require, exports, module) {
                     // no result from Tern.  Fall back to findInProject().
                     findInProject(functionName).done(function (functions) {
                         if (functions && functions.length > 0) {
-                            // opens the file
-                            var filePath = functions[0].document.file.fullPath;
-                            openFile(filePath).done(function () {
-                                result.resolve(functions);
-                            });
+                            processFunctions(functions, result);
                         } else {
                             // No matching functions were found
                             result.reject({reason: Utils.NO_DEFINITION_MATCH});
@@ -103,6 +102,23 @@ define(function (require, exports, module) {
     }
     
     
+    function processFunctions (functions , $result) {
+        
+//        if(functions.length === 1){ // if single definition is only found, then proceed to open the file and complete.
+//            var filePath = functions[0].document.file.fullPath;
+//            openFile(filePath).done(function () {
+//                $result.resolve(functions);
+//            });
+//            return;
+//        }
+        
+        
+        $result.resolve(functions);
+        SuggestionList.updateSuggestions(functions);
+    }
+    
+    
+    
     /**
      * @private
      * Finds the function in the open project folder and sub-folders
@@ -113,22 +129,12 @@ define(function (require, exports, module) {
     function findInProject(functionName) {
         var result = new $.Deferred();
 
-        function _nonBinaryFileFilter(file) {
-            return !LanguageManager.getLanguageForPath(file.fullPath).isBinary();
-        }
-
         ProjectManager.getAllFiles(_nonBinaryFileFilter)
             .done(function (files) {
+                
                 JSUtils.findMatchingFunctions(functionName, files)
                     .done(function (functions) {
-                        if (functions.length === 0) {
-                            result.reject({reason: Utils.NO_DEFINITION_MATCH});
-                            return;
-                        }
-                        var filePath = functions[0].document.file.fullPath;
-                        openFile(filePath).done(function () {
-                            result.resolve(functions);
-                        });
+                        result.resolve(functions);
                     })
                     .fail(function (reason) {
                         result.reject(reason);
@@ -139,6 +145,10 @@ define(function (require, exports, module) {
             });
 
         return result.promise();
+    }
+    
+    function _nonBinaryFileFilter(file) {
+        return !LanguageManager.getLanguageForPath(file.fullPath).isBinary();
     }
     
     
@@ -168,6 +178,6 @@ define(function (require, exports, module) {
         findInProject:      findInProject,
         openFile:           openFile
     };
-
+    
 });
 

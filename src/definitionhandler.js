@@ -99,6 +99,7 @@ define(function (require, exports, module) {
      * @param cursorPos {!{line:number, ch:number}}
      */
     function _setCursorPosition(cursorPos) {
+        // can add a better curser placement. TODO
         EditorManager.getCurrentFullEditor().setCursorPos(cursorPos.line, cursorPos.ch, true);
     }
     

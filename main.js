@@ -13,12 +13,15 @@ define(function (require, exports, module) {
     
     // file imports check for file in src folder
     var EventBinder         = require('src/mouseeventbinder'),
-        DefinitionHandler   = require('src/definitionhandler');
+        DefinitionHandler   = require('src/definitionhandler'),
+        SuggestionList      = require('src/suggestionlist');
+        
         
     
     // binding all events on the appReady event
     AppInit.appReady(function () {
         EventBinder.bindEvents();
+        SuggestionList.init();
     });
 
     // First, register a command - a UI-less object associating an id to a handler

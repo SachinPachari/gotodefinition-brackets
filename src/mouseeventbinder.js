@@ -5,7 +5,8 @@ define(function (require, exports, module) {
     // module imports 
     var ExtensionUtils          = brackets.getModule('utils/ExtensionUtils'),
         EditorManager           = brackets.getModule('editor/EditorManager'),
-        DocumentManager         = brackets.getModule('document/DocumentManager');
+        DocumentManager         = brackets.getModule('document/DocumentManager'),
+        KeyEvent                 = brackets.getModule('utils/KeyEvent');
     
     // file imports check for file in src folder
     var Utils               = require('src/utils'),
@@ -50,7 +51,7 @@ define(function (require, exports, module) {
      */
     
     function keyUpListener(e) {
-        if (e.keyCode === 17 || e.keyCode === 91) {
+        if (e.keyCode === KeyEvent.DOM_VK_CONTROL || e.keyCode === 91) {
             _removeTextmarkers();
         }
     }
