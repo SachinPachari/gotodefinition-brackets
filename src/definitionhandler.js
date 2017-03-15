@@ -62,7 +62,7 @@ define(function (require, exports, module) {
                     _handleInvalid(err.reason);
                 });
             } catch (err) {
-                console.error(err);
+                console.error('Error \n ',err);
                 // handle the hiding of glass window. in case of some errors
                 _toggleGlassWindow();
             }

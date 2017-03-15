@@ -2,24 +2,9 @@
 define(function (require, exports, module) {
     'use strict';
     
-//    var CLASS_NAME              = 'jump-to-text-marker',
-//        NO_DEFINITION_MATCH     = 'No Definition match',
-//        FUNCTION_NAME_INVALID   = 'Invalid Function Name';
-    
-    /**
-     * Validate the token value in the editor.
-     * 
-     * @param {!string} type
-     * @return boolean
-     */
-//    function isValidToken(type) {
-//        if (type === 'property' || type === 'variable' || type === 'variable-2') {
-//            return true;
-//        }
-//        return false;
-//    }
-    
-    var ProjectManager          = brackets.getModule('project/ProjectManager');
+    var ProjectManager          = brackets.getModule('project/ProjectManager'),
+        Menus                   = brackets.getModule("command/Menus"),
+        PopUpManager            = brackets.getModule("widgets/PopUpManager");
     
     
     function init(){
@@ -28,13 +13,13 @@ define(function (require, exports, module) {
         $body.append($suggestionsContainer);
         
         // creating a drop-down menu 
-        var $completeList = $("<li class='dropdown suggestions-menu'></li>")
+        var $suggestionList = $("<li class='dropdown suggestions-menu'></li>")
         .append($("<a href='#' class='dropdown-toggle' data-toggle='dropdown'></a>").hide())
         .append("<ul class='suggestions-dropdown-menu'></ul>");
         
-        this.$completeList = $completeList;
+        this.$suggestionList = $suggestionList;
         
-        $suggestionsContainer.append($completeList);
+        $suggestionsContainer.append($suggestionList);
     }
     
     function updateSuggestions (functionList){
@@ -47,22 +32,36 @@ define(function (require, exports, module) {
 //        this.hints = functionList.hints;
 //        this.hints.handleWideResults = functionList.handleWideResults;
         
+        // clearing the old list 
+        Menus.closeAll();
+//        this.$suggestionList.find("li").remove();
+        
+        // process the data 
         var rootDir = ProjectManager.getProjectRoot();
         var rootPath = rootDir.fullPath;
         for( var i = 0; i < functionList.length; i++ ){
             var filePath = functionList[i].document.file.fullPath;
             var relativeFilePath = filePath.replace(rootPath, '');
             view.hints.push({ 
-                formattedHint: "<span>" + relativeFilePath + "</span>", 
+                formattedHint: "<span> @ " + relativeFilePath + "</span>", 
                 functionPath: functionList[i] 
             });
         }
         
-        // clearing the old list 
-        this.$completeList.find("li").remove();
         
-        var $ul = this.$completeList.find("ul.dropdown-menu"),
+        // append the new data into the view component
+        var $ul = this.$suggestionList.find("ul.suggestions-dropdown-menu"),
                 $parent = $ul.parent();
+        
+        // open the suggestion box 
+        this.$suggestionList.addClass("open")
+                .css({"left": 200, "top": 200, "width": 200 + "px"});
+            this.opened = true;
+        
+        PopUpManager.addPopUp(this.$suggestionList, function () {
+            console.info('closing popup');
+        }, true);
+        
 //
 //        
 //                // clear the list
